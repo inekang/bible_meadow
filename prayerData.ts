@@ -12,7 +12,7 @@ export const CATHOLIC_PRAYERS: CatholicPrayer[] = [
   },
   {
     title: "영광송",
-    content: "영광이 부부와자와 성령께\n처음과 같이\n이제와 항상 영원히. 아멘."
+    content: "영광이 성부와 성령께\n처음과 같이\n이제와 항상 영원히. 아멘."
   },
   {
     title: "삼종기도",

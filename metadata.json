@@ -1,0 +1,10 @@
+{
+  "name": "버전2 양떼들의 말씀읽기",
+  "description": "A healing game where a sheep reads Bible verses on a meadow fence and tracks your emotional state. Achieve higher levels by reading more verses!",
+  "requestPermissions": [
+    "notifications"
+  ],
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}

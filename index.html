@@ -1,0 +1,79 @@
+
+<!DOCTYPE html>
+<html lang="ko" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>양떼들의 말씀읽기 - Sheep's Bible Meadow</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        html, body, #root {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            overflow: hidden;
+            background: #2E3192;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .sheep-animate {
+            animation: float 3s ease-in-out infinite;
+        }
+        /* 통일된 스크롤바 스타일 (보라 계열) */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(157, 161, 255, 0.4);
+            border-radius: 10px;
+        }
+        /* 가라오케 효과 */
+        .karaoke-active {
+            color: white;
+            text-shadow: 0 0 10px rgba(255,255,255,0.8);
+            transition: all 0.3s ease;
+        }
+        .karaoke-inactive {
+            color: rgba(255,255,255,0.3);
+            transition: all 0.3s ease;
+        }
+        /* 보석 버튼 인터랙션 */
+        @keyframes gem-pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 173, 239, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(0, 173, 239, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 173, 239, 0); }
+        }
+        .btn-gem-active {
+            animation: gem-pulse 2s infinite;
+        }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "vite": "https://esm.sh/vite@^7.3.1",
+    "@google/genai": "https://esm.sh/@google/genai@^1.36.0",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="overflow-hidden select-none">
+    <div id="root" class="h-full"></div>
+    <script type="module" src="/index.tsx"></script>
+</body>
+</html>

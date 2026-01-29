@@ -19,18 +19,6 @@ const Meadow: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
       <div className="absolute bottom-0 w-[160%] h-[45%] -left-[30%] rounded-[100%] opacity-30 translate-y-[35%] pointer-events-none bg-[#3B3E91]"></div>
       <div className="absolute bottom-0 w-[180%] h-[30%] -left-[40%] rounded-[100%] translate-y-[45%] pointer-events-none bg-[#5255BB]/40"></div>
 
-      {/* Fence Silhouettes (Matching the provided image) */}
-      <div className="absolute bottom-[20%] left-0 w-full flex justify-around px-2 pointer-events-none opacity-20">
-        {[...Array(8)].map((_, i) => (
-          <div key={i} className="flex flex-col items-center">
-            <div className="w-5 h-28 relative bg-[#1A1C4F]">
-              <div className="absolute top-8 -left-5 w-14 h-4 bg-[#1A1C4F]"></div>
-              <div className="absolute top-18 -left-5 w-14 h-4 bg-[#1A1C4F]"></div>
-            </div>
-          </div>
-        ))}
-      </div>
-
       {/* Main Content Area */}
       <div className="relative z-10 w-full h-full flex flex-col items-center">
         {children}

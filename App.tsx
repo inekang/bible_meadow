@@ -7,6 +7,10 @@ import { CATHOLIC_PRAYERS } from './prayerData';
 import { fetchDailyGospelAcclamation } from './services/geminiService';
 import Meadow from './components/Meadow';
 import SheepCharacter from './components/SheepCharacter';
+import { SettingsPage } from './components/SettingsPage';
+import bgmPiano from './assets/sounds/bgm4.mp3';   // 피아노로 쓸 파일
+import bgmNature from './assets/sounds/bgm3.mp3'; // 자연음으로 쓸 파일
+import bgmSing from "./assets/sounds/emao.mp3"; // 엠마오로 가는 고양이 노래
 
 const App: React.FC = () => {
   const [progress, setProgress] = useState<UserProgress>(() => {
@@ -22,6 +26,28 @@ const App: React.FC = () => {
     };
     return saved ? { ...base, ...JSON.parse(saved) } : base;
   });
+
+  // [추가됨] 배경음악 상태 관리
+  const [bgm, setBgm] = useState<'none' | 'piano' | 'nature' |'sing'>('none');
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // [추가됨] 음악 변경 감지 및 재생
+  useEffect(() => {
+    if (!audioRef.current) return;
+
+   if (bgm === 'none') {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    } else {
+      let selectedSrc = bgmPiano; // 기본값
+      if (bgm === 'nature') selectedSrc = bgmNature;
+      if (bgm === 'sing') selectedSrc = bgmSing; // 🎶 추가된 부분
+
+      audioRef.current.src = selectedSrc;
+      audioRef.current.volume = 0.3; 
+      audioRef.current.play().catch(e => console.log("자동 재생 정책에 의해 막힘:", e));
+    }
+  }, [bgm]);
 
   const [gameState, setGameState] = useState<GameState>(progress.sheepName ? 'START' : 'ONBOARDING');
   const [tempName, setTempName] = useState("");
@@ -252,6 +278,7 @@ const App: React.FC = () => {
 
   return (
     <Meadow>
+      <audio ref={audioRef} loop />
       <div className="w-full max-w-md h-full flex flex-col p-6 overflow-hidden relative">
         
         {/* Onboarding */}
@@ -264,10 +291,24 @@ const App: React.FC = () => {
             <div className="absolute bottom-4 w-full text-center text-[11px] font-medium text-white/30 tracking-tight">© 2026 AIitZ Ellie company</div>
           </div>
         )}
-
+        
         {/* Start Screen - 상단 정렬로 이동 */}
+        
         {gameState === 'START' && (
           <div className="flex-1 flex flex-col items-center justify-start pt-4 relative animate-in fade-in duration-500">
+
+            {/* [추가됨] 설정 버튼 (좌측 상단) */}
+            <div className="absolute top-0 left-0 z-20">
+              <button
+                onClick={() => setGameState('SETTINGS')} 
+                className="bg-white/20 backdrop-blur-md p-2 rounded-full border border-white/20 text-white shadow-lg active:scale-95 transition-all hover:bg-white/30"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </button>
+            </div>
             <div className="absolute top-0 right-0 flex flex-col gap-2 items-end z-20">
               <div className="bg-white/95 px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg border border-white/20 min-w-[70px] justify-center">
                 <span className="text-[#6265B8] font-black text-xs">{progress.totalVersesRead}</span>
@@ -306,6 +347,14 @@ const App: React.FC = () => {
               </button>
             </div>
           </div>
+        )}
+        {/* [추가됨] 설정 페이지 렌더링 */}
+        {gameState === 'SETTINGS' && (
+          <SettingsPage 
+          onBack={() => setGameState('START')} 
+          currentBgm={bgm}      // 현재 음악 상태 알려줌
+          onBgmChange={setBgm}  // 음악 바꾸는 리모컨 쥐여줌
+        />
         )}
 
         {/* Emotion Card Grid */}

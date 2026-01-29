@@ -57,7 +57,8 @@ export type GameState =
   | 'MEDITATION_PRAYER' 
   | 'EMOTION_DIARY'    
   | 'BIBLE_VIEW'
-  | 'ACTIVITY';
+  | 'ACTIVITY'
+    'SETTINGS';
 
 export interface UserProgress {
   sheepName?: string;

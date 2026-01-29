@@ -16,6 +16,8 @@ const cleanJsonResponse = (text: string) => {
 // ---------------------------------------------------------
 // 기능 1: 성경 구절 가져오기
 // ---------------------------------------------------------
+
+
 export const fetchBibleChapterVerses = async (book: string, chapter: number): Promise<Verse[]> => {
   try {
     const result = await model.generateContent(`
@@ -40,64 +42,49 @@ export const fetchBibleChapterVerses = async (book: string, chapter: number): Pr
 };
 
 // ---------------------------------------------------------
-// 기능 2: 오늘의 복음 환호성 (RSS + AI 요약)
-// * 무료 티어라 Google Search 대신 RSS를 사용합니다.
+// 기능 2: 오늘의 복음 (AI 랜덤 추천 방식)
+// * RSS 크롤링 없이, AI가 상황에 맞는 복음 말씀을 랜덤으로 추천합니다.
 // ---------------------------------------------------------
 export const fetchDailyGospelAcclamation = async (): Promise<Verse> => {
-  let promptText = "";
-
   try {
-    // 1. 가톨릭 굿뉴스 RSS 가져오기
-    const RSS_URL = "https://maria.catholic.or.kr/mi_pr/rss/rss_view.asp?s_code=1001";
-    const API_URL = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(RSS_URL)}`;
-    
-    const rssResponse = await fetch(API_URL);
-    if (!rssResponse.ok) throw new Error("RSS 서버 응답 오류");
-
-    const rssData = await rssResponse.json();
-    if (!rssData.items || rssData.items.length === 0) throw new Error("RSS 데이터 없음");
-    
-    // 2. 성공 시: RSS 내용에서 복음 환호성 찾기
-    promptText = `
-      아래 텍스트는 '오늘의 매일미사' 전체 내용이야. 
-      여기서 [복음 환호성] 부분을 찾아서 그 안의 '내용'과 '출처(장절)'를 추출해줘.
-      반드시 JSON 형식({"text": "...", "reference": "..."})으로만 답변해.
+    // 1. AI에게 랜덤 추천 요청 프롬프트 작성
+    const promptText = `
+      한국 천주교 성경(CBCK)의 '4복음서(마태오, 마르코, 루카, 요한)' 중에서
+      오늘 하루 힘이 되고 위로가 되는 말씀을 하나만 랜덤으로 추천해줘.
       
-      [데이터]
-      ${rssData.items[0].description}
+      [조건]
+      1. 너무 유명한 구절보다는 묵상하기 좋은 구절로 선택해줘.
+      2. 내용은 반드시 한국어 성경 원문 그대로여야 해.
+      3. 응답은 오직 JSON 형식({"text": "...", "reference": "..."})으로만 해줘.
+      
+      예시:
+      {"text": "고생하며 무거운 짐을 진 너희는 모두 나에게 오너라. 내가 너희에게 안식을 주겠다.", "reference": "마태오 복음 11장 28절"}
     `;
 
-  } catch (rssError) {
-    console.warn("RSS 실패, AI 추천으로 대체합니다.", rssError);
-    // 3. 실패 시: AI에게 위로의 말씀 추천 요청 (앱이 안 꺼지게 방어)
-    promptText = `
-      오늘은 매일미사 정보를 가져올 수 없어.
-      대신 힘들거나 지친 사람에게 힘이 되는 '짧은 성경 구절' 하나를 랜덤으로 추천해줘.
-      반드시 JSON 형식({"text": "...", "reference": "..."})으로 답변해줘.
-    `;
-  }
-
-  try {
+    // 2. AI 응답 생성
     const result = await model.generateContent(promptText);
-    const jsonResult = JSON.parse(cleanJsonResponse(result.response.text()));
+    const responseText = result.response.text();
+    const jsonResult = JSON.parse(cleanJsonResponse(responseText));
 
+    // 3. 결과 반환
     return {
       id: Date.now(),
-      text: jsonResult.text.replace(/알렐루야/g, '').trim(), // 알렐루야 중복 제거
+      text: jsonResult.text,
       reference: jsonResult.reference,
-      category: "복음 환호성"
+      category: "오늘의 복음"
     };
-  } catch (aiError) {
-    console.error("AI 응답 실패:", aiError);
+
+  } catch (error) {
+    console.error("AI 말씀 추천 실패:", error);
+    // 4. 실패 시 기본 말씀 반환 (안전장치)
     return {
       id: Date.now(),
-      text: "사람은 빵만으로 살지 않고 하느님의 입에서 나오는 모든 말씀으로 산다.",
-      reference: "마태 4,4",
+      text: "너희는 세상의 빛이다. 산 위에 자리 잡은 고을은 감추어질 수 없다.",
+      reference: "마태오 복음 5장 14절",
       category: "기본 말씀"
     };
   }
 };
-
 // ---------------------------------------------------------
 // 기능 3: 성경 읽기 검사 (STT 판정)
 // ---------------------------------------------------------

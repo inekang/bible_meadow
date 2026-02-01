@@ -176,7 +176,7 @@ export const EMOTION_DB: Record<Emotion, EmotionDetail> = {
       reference: "이사야서 40,31",
       text: "주님께 바라는 이들은 새 힘을 얻고 독수리처럼 날개치며 올라간다. 그들은 뛰어도 지칠 줄 모르고 걸어도 피곤한 줄 모른다."
     },
-    meditationTip: "편안히 앉아 깊이 숨쉬며 몸의 피로를 느끼세요. 하느님 앞에 서는 독수리처럼 자유로워지는 상상을 해보세요"
+    meditationTip: "편안히 앉아 깊이 숨쉬며 몸의 피로를 느끼세요. 바람을 타고 나는 독수리처럼 자유로워지는 상상을 해보세요"
   },
   [Emotion.COMPASSION]: {
     type: Emotion.COMPASSION,

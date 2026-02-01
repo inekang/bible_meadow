@@ -187,8 +187,8 @@ export const EMOTION_DB: Record<Emotion, EmotionDetail> = {
       reference: "루카 1,50",
       text: "그분의 이름은 거룩하고 그분의 자비는 대대로 당신을 경외하는 이들에게 미칩니다."
     },
-    meditationTip: "조용히 앉아 호흡하며 마음을 가다듬으세요. 십자성호를 그으며 "하느님, 당신 자비를 깨닫게 하소서"라고 기도. 구절을 미리 떠올리며 기대감을 품으세요."
-  }
+    meditationTip: "조용히 앉아 호흡하며 마음을 가다듬으세요. 구절을 미리 떠올리며 자비의 기대감을 품으세요."
+  },
 };
 
 export const MEDITATION_COMMON_PRAYER = "주님, 당신의 부활의 기쁨으로 제 영혼을 밝히소서. 당신 영광을 위해 제 모든 것을 사용하게 하시고, 당신 현존에서 영적 기쁨을 누리게 하소서. 아멘.";

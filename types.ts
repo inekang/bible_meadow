@@ -14,7 +14,9 @@ export enum Emotion {
   COURAGE = '용기',
   THANKS = '감사',
   STRENGTH = '힘',
-  COMFORT = '위로'
+  COMFORT = '위로',
+  TIRED = '지침',
+  COMPASSION = '연민'
 }
 
 export interface Verse {

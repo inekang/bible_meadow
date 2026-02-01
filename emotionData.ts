@@ -85,8 +85,8 @@ export const EMOTION_DB: Record<Emotion, EmotionDetail> = {
     color: '#FFF9E5',
     prayer: "항상 기쁨으로 기도하나이다. 주님의 완전한 기쁨으로 제 마음을 채우시고, 슬픔 속에서도 감사하게 하소서.",
     verse: {
-      reference: "네헤미야 8,10",
-      text: "슬퍼하지 마라. 주님을 기뻐하라. 그분이 너희 힘이 되신다."
+      reference: "느헤미야 8,10",
+      text: "주님께서 베푸시는 기쁨이 바로 여러분의 힘이니, 서러워하지들 마십시오."
     },
     meditationTip: "주님이 주시는 기쁨이 내 삶의 가장 큰 힘임을 고백해 보세요."
   },
@@ -176,7 +176,7 @@ export const EMOTION_DB: Record<Emotion, EmotionDetail> = {
       reference: "이사야서 40,31",
       text: "주님께 바라는 이들은 새 힘을 얻고 독수리처럼 날개치며 올라간다. 그들은 뛰어도 지칠 줄 모르고 걸어도 피곤한 줄 모른다."
     },
-    meditationTip: "편안히 앉아 깊이 숨쉬며 몸의 피로를 느끼세요. 주변 소음을 내려놓고 하느님 앞에 서는 독수리처럼 자유로워지는 상상을 해보세요"
+    meditationTip: "편안히 앉아 깊이 숨쉬며 몸의 피로를 느끼세요. 하느님 앞에 서는 독수리처럼 자유로워지는 상상을 해보세요"
   },
   [Emotion.COMPASSION]: {
     type: Emotion.COMPASSION,

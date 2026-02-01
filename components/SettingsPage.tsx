@@ -90,11 +90,22 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onBack, currentBgm, 
             </div>
             
             {/* 이름 및 설명 */}
-            <h3 className="font-bold text-[#2E3192] text-lg">Created by Kang Inhye</h3>
-            <p className="text-gray-500 text-xs mt-2 mb-6 leading-relaxed">
-              하느님의 말씀을 더 가까이,<br />
-              매일의 묵상을 돕기 위해 만들었습니다.
-            </p>
+          <h3 className="font-bold text-[#2E3192] text-lg">Created by Kang Inhye</h3>
+          <p className="text-gray-500 text-xs mt-2 mb-6 leading-relaxed">
+            하느님의 말씀을 더 가까이,<br />
+            매일의 묵상을 돕기 위해 만들었습니다.
+          </p>
+
+          {/* 👇 [추가됨] 1그리드 형태: 개발자 응원하기 버튼 */}
+          <a
+            href="https://buymeacoffee.com/inekang?status=1"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full flex items-center justify-center gap-2 p-3 mb-6 rounded-2xl bg-[#FFDD00] hover:bg-[#FFEA00] text-[#5F4500] font-bold shadow-sm transition-all active:scale-95"
+          >
+            <span className="text-xl">☕️</span>
+            <span>개발자에게 커피 선물하기</span>
+          </a>
 
             {/* 연락처 버튼 그리드 (3개) */}
             <div className="grid grid-cols-3 gap-3 mb-6">

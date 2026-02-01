@@ -166,6 +166,28 @@ export const EMOTION_DB: Record<Emotion, EmotionDetail> = {
       text: "네 무거운 짐 주님께 맡겨 드려라. 그분께서 너를 붙들어 주시리라."
     },
     meditationTip: "불안한 마음을 물 위에 띄워 보내는 상상을 하세요."
+  },
+  [Emotion.TIRED]: {
+    type: Emotion.TIRED,
+    icon: '🫩',
+    color: '#FFF9E5',
+    prayer: "하느님, 제 지친 마음을 당신께 맡깁니다. 당신 뜻대로 새 힘 주소서.",
+    verse: {
+      reference: "이사야서 40,31",
+      text: "주님께 바라는 이들은 새 힘을 얻고 독수리처럼 날개치며 올라간다. 그들은 뛰어도 지칠 줄 모르고 걸어도 피곤한 줄 모른다."
+    },
+    meditationTip: "편안히 앉아 깊이 숨쉬며 몸의 피로를 느끼세요. 주변 소음을 내려놓고 하느님 앞에 서는 독수리처럼 자유로워지는 상상을 해보세요"
+  },
+  [Emotion.COMPASSION]: {
+    type: Emotion.COMPASSION,
+    icon: '💖',
+    color: '#FFF9E5',
+    prayer: "하느님, 자비의 문으로 인도해주소서.가난한 이에게 자비를 베푸는 당신 모습을 본받아 저도 사랑과 연민으로 살아가게 하소서.",
+    verse: {
+      reference: "루카 1,50",
+      text: "그분의 이름은 거룩하고 그분의 자비는 대대로 당신을 경외하는 이들에게 미칩니다."
+    },
+    meditationTip: "조용히 앉아 호흡하며 마음을 가다듬으세요. 십자성호를 그으며 "하느님, 당신 자비를 깨닫게 하소서"라고 기도. 구절을 미리 떠올리며 기대감을 품으세요."
   }
 };
 

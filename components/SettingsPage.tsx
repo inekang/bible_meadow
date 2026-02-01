@@ -123,19 +123,22 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onBack, currentBgm, 
               </a>
 
               {/* Website (준비 중) */}
-              <button 
-                onClick={() => alert("홈페이지는 준비 중입니다! 😊")}
-                className="flex flex-col items-center justify-center p-3 rounded-2xl bg-gray-50 hover:bg-gray-100 border border-gray-100 transition-all active:scale-95 opacity-60"
-              >
-                <svg className="w-6 h-6 text-gray-700 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
-                </svg>
-                <span className="text-[10px] font-bold text-gray-600">Website</span>
-              </button>
+            {/* Website (노션 포트폴리오 연결) */}
+          <a 
+          href="https://www.notion.so/2fa512c3b5ba80079762f77ec6e54b48?source=copy_link"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex flex-col items-center justify-center p-3 rounded-2xl bg-gray-50 hover:bg-gray-100 border border-gray-100 transition-all active:scale-95 cursor-pointer"
+          >
+        <svg className="w-6 h-6 text-gray-700 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
+        </svg>
+      <span className="text-[10px] font-bold text-gray-600">Website</span>
+      </a>
             </div>
 
             <div className="text-[10px] text-gray-400 border-t border-gray-100 pt-4">
-              v1.0.0 | bible_meadow
+              v1.1.0 | bible_meadow
             </div>
           </div>
         </section>

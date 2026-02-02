@@ -1,6 +1,8 @@
 # 🐑 성경 읽는 양 (Bible Meadow)
 
 > 매일의 복음 말씀을 읽고, 감정에 따른 위로의 성경 구절을 묵상하는 가톨릭 웹 애플리케이션입니다.
+
+![bible_meadow](src/assets/banner.png)
 ![bible_meadow](src/assets/bible_meadow.png)
 
 ![Project Status](https://img.shields.io/badge/Status-Active-success)
@@ -13,6 +15,7 @@
 귀여운 양 캐릭터와 함께 편안한 배경음악을 들으며, 매일의 복음을 소리 내어 읽고 마음의 평화를 찾을 수 있습니다.
 
 **배포 링크:** [https://biblemeadow.netlify.app](https://biblemeadow.netlify.app)
+
 ---
 
 ## ✨ 주요 기능 (Key Features)

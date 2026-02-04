@@ -137,7 +137,7 @@ export const EMOTION_DB: Record<Emotion, EmotionDetail> = {
   },
   [Emotion.WEAKNESS]: {
     type: Emotion.WEAKNESS,
-    icon: '💪',
+    icon: '🤲',
     color: '#E5F0FF',
     prayer: "주님, 저에게 힘을 주소서. 제 약함을 당신의 강함으로 채우시고, 어떤 어려움도 이겨낼 용기를 주소서.아멘.",
     verse: {

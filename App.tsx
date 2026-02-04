@@ -86,7 +86,7 @@ const App: React.FC = () => {
       setDiaryText(""); // 텍스트 상태를 빈 문자열로 리셋
     }
   }, [gameState]);
-   
+
   // 기도문 변경 시 단어 배열 초기화
   useEffect(() => {
     const words = selectedPrayer.content.split(/\s+/);
@@ -432,15 +432,37 @@ const App: React.FC = () => {
           </div>
         )}
 
+     
         {/* Meditation Guide */}
         {gameState === 'MEDITATION_GUIDE' && (
-          <div className="flex-1 flex flex-col items-center justify-center text-center animate-in fade-in">
-            <div className="bg-white/5 backdrop-blur-md p-8 rounded-[40px] border border-white/10 w-full">
-              <div className="text-4xl mb-6 text-white">✝️</div>
-              <h3 className="text-xl font-bold text-white mb-4">[묵상 도우미]</h3>
-              <p className="text-white/80 leading-relaxed mb-8 break-keep">{selectedEmotion?.meditationTip || "잠시 눈을 감고 말씀을 되새겨 보세요."}</p>
-              <button onClick={() => setGameState('MEDITATION_PRAYER')} className="w-full bg-white text-[#2E3192] py-4 rounded-2xl font-bold">기도 시작하기</button>
+          // [수정] 부모 태그에서 items-center justify-center 제거 (상단 버튼과 중앙 카드를 분리하기 위함)
+          <div className="flex-1 flex flex-col pt-2 animate-in fade-in">
+            
+            {/* 1. [추가] 상단 홈 버튼 영역 */}
+            <div className="w-full flex justify-start px-4 mb-4">
+               <button 
+                 onClick={() => { stopListening(); setGameState('START'); }}
+                 className="text-white/70 flex items-center gap-1 active:scale-90 transition-all text-sm font-bold hover:text-white"
+               >
+                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M15 19l-7-7 7-7"/></svg>
+                 홈으로
+               </button>
             </div>
+
+            {/* 2. 메인 컨텐츠 (카드) - 여기서 다시 중앙 정렬 */}
+            <div className="flex-1 flex flex-col items-center justify-center text-center px-4">
+              <div className="bg-white/5 backdrop-blur-md p-8 rounded-[40px] border border-white/10 w-full">
+                <div className="text-4xl mb-6 text-white">✝️</div>
+                <h3 className="text-xl font-bold text-white mb-4">[묵상 도우미]</h3>
+                <p className="text-white/80 leading-relaxed mb-8 break-keep">
+                  {selectedEmotion?.meditationTip || "잠시 눈을 감고 말씀을 되새겨 보세요."}
+                </p>
+                <button onClick={() => setGameState('MEDITATION_PRAYER')} className="w-full bg-white text-[#2E3192] py-4 rounded-2xl font-bold active:scale-95 transition-all">
+                  기도 시작하기
+                </button>
+              </div>
+            </div>
+            
           </div>
         )}
 

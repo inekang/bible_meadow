@@ -4,19 +4,20 @@ export enum Emotion {
   ANXIETY = '불안',
   HOPE = '희망',
   FEAR = '두려움',
-  PEACE = '평화',
+  PEACE = '근심',
   STRESS = '스트레스',
-  PRIDE = '자부심',
+  PRIDE = '교만',
   DOUBT = '의심',
   JEALOUSY = '질투',
   JOY = '기쁨',
   HEALING = '치유',
   COURAGE = '용기',
   THANKS = '감사',
-  STRENGTH = '힘',
+  WEAKNESS = '약함',
   COMFORT = '위로',
   TIRED = '지침',
-  COMPASSION = '연민'
+  COMPASSION = '연민',
+  LONELYNESS = '외로움'
 }
 
 export interface Verse {

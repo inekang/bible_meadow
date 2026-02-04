@@ -39,7 +39,7 @@ export const EMOTIONS_META: { type: Emotion; color: string; icon: string }[] = [
   { type: Emotion.JOY, color: 'bg-[#FFF9E5]', icon: '😊' },
   { type: Emotion.PEACE, color: 'bg-[#E5F9F0]', icon: '🍃' },
   { type: Emotion.THANKS, color: 'bg-[#FFF2E5]', icon: '🙏' },
-  { type: Emotion.STRENGTH, color: 'bg-[#E5F0FF]', icon: '💪' },
+  { type: Emotion.WEAKNESS, color: 'bg-[#E5F0FF]', icon: '💪' },
   { type: Emotion.COMFORT, color: 'bg-[#F5E5FF]', icon: '✨' }
 ];
 

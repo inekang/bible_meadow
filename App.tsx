@@ -80,7 +80,13 @@ const App: React.FC = () => {
     };
     loadDaily();
   }, []);
-
+  // 마음봉헌 기도문 초기화
+  useEffect(() => {
+    if (gameState === 'EMOTION_DIARY') {
+      setDiaryText(""); // 텍스트 상태를 빈 문자열로 리셋
+    }
+  }, [gameState]);
+   
   // 기도문 변경 시 단어 배열 초기화
   useEffect(() => {
     const words = selectedPrayer.content.split(/\s+/);
@@ -441,13 +447,25 @@ const App: React.FC = () => {
         {/* Meditation Prayer */}
         {gameState === 'MEDITATION_PRAYER' && (
           <div className="flex-1 flex flex-col pt-2 overflow-hidden animate-in zoom-in relative">
-            <div className="flex justify-start mb-4">
-              <button 
-                onClick={() => { stopListening(); setIsPrayerDrawerOpen(true); }}
-                className="bg-white/20 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/20 text-white text-xs font-bold active:scale-95 transition-all"
-              >
-                다른 기도문 선택
-              </button>
+            
+            {/* 상단 버튼 영역 (수정됨: 홈으로 버튼 추가) */}
+            <div className="flex justify-between items-center mb-4 px-1">
+               {/* 1. 홈으로 가기 버튼 */}
+               <button 
+                 onClick={() => { stopListening(); setGameState('START'); }} // 마이크 끄고 홈으로 이동
+                 className="text-white/70 flex items-center gap-1 active:scale-90 transition-all text-sm font-bold hover:text-white"
+               >
+                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M15 19l-7-7 7-7"/></svg>
+                 홈으로
+               </button>
+
+               {/* 2. 다른 기도문 선택 버튼 */}
+               <button 
+                 onClick={() => { stopListening(); setIsPrayerDrawerOpen(true); }}
+                 className="bg-white/20 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/20 text-white text-xs font-bold active:scale-95 transition-all"
+               >
+                 다른 기도문 선택
+               </button>
             </div>
 
             <div className="flex-1 flex flex-col items-center overflow-hidden">

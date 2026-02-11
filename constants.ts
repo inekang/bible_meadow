@@ -1,5 +1,5 @@
 
-import { Emotion, Verse, BibleBook } from './types';
+import { Verse, BibleBook } from './types';
 
 export const CATHOLIC_BIBLE: BibleBook[] = [
   // 구약성경 (Pentateuch)
@@ -35,12 +35,6 @@ export const BIBLE_VERSES: Verse[] = [
   { "id": 18, "text": "사람은 빵만으로 살지 않고 하느님의 입에서 나오는 모든 말씀으로 산다.", "reference": "마태 4:4", "category": "열매" }
 ];
 
-export const EMOTIONS_META: { type: Emotion; color: string; icon: string }[] = [
-  { type: Emotion.JOY, color: 'bg-[#FFF9E5]', icon: '😊' },
-  { type: Emotion.PEACE, color: 'bg-[#E5F9F0]', icon: '🍃' },
-  { type: Emotion.THANKS, color: 'bg-[#FFF2E5]', icon: '🙏' },
-  { type: Emotion.WEAKNESS, color: 'bg-[#E5F0FF]', icon: '🤲' },
-  { type: Emotion.COMFORT, color: 'bg-[#F5E5FF]', icon: '✨' }
-];
+
 
 export const LEVEL_REQUIREMENTS = [10, 25, 50, 100];

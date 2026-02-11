@@ -84,6 +84,5 @@ export interface CatholicPrayer {
 export interface BibleBook {
   name: string;
   chapters: number;
-  testament: '구약' | '신약'
-  ;
+  testament: '구약' | '신약';
 }

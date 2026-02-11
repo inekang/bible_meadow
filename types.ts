@@ -1,3 +1,16 @@
+// Game state types
+export type GameState = 
+  | 'ONBOARDING' 
+  | 'START' 
+  | 'SETTINGS'
+  | 'PROFILE'
+  | 'EMOTION_CARD' 
+  | 'READING' 
+  | 'MEDITATION_GUIDE' 
+  | 'MEDITATION_PRAYER'
+  | 'MEDITATION_SILENT' 
+  | 'EMOTION_DIARY' 
+  | 'BIBLE_VIEW';
 
 export enum Emotion {
   ANGER = '분노',
@@ -24,53 +37,46 @@ export interface Verse {
   id: number;
   text: string;
   reference: string;
-  category?: string;
-  urls?: { uri: string; title: string }[];
-}
-
-export interface BibleBook {
-  name: string;
-  chapters: number;
-  testament: '구약' | '신약';
+  category: string;
 }
 
 export interface EmotionDetail {
   type: Emotion;
-  prayer: string;
-  verse: {
-    reference: string;
-    text: string;
-  };
-  meditationTip: string;
   icon: string;
   color: string;
+  verse: {
+    text: string;
+    reference: string;
+  };
+  prayer: string;
+  meditationTip: string;
+  
+}
+
+export interface EmotionEntry {
+  emotion: Emotion;
+  timestamp: number;
+  note?: string;
+}
+
+export interface UserProgress {
+  sheepName?: string;
+  totalVersesRead: number;
+  graceGems?: number;
+  readVerseIds: number[];
+  level: number;
+  emotionHistory: EmotionEntry[];
+  dailyStreak: number;
+  reminderEnabled: boolean;
+  // Profile fields
+  nickname?: string;
+  baptismalName?: string;
+  feastDay?: string;
+  startDate?: string;
+   profileImage?: string;
 }
 
 export interface CatholicPrayer {
   title: string;
   content: string;
-}
-
-export type GameState = 
-  | 'ONBOARDING' 
-  | 'START' 
-  | 'EMOTION_CARD' 
-  | 'READING'      
-  | 'MEDITATION_GUIDE' 
-  | 'MEDITATION_PRAYER' 
-  | 'EMOTION_DIARY'    
-  | 'BIBLE_VIEW'
-  | 'ACTIVITY'
-  | 'SETTINGS';
-
-export interface UserProgress {
-  sheepName?: string;
-  totalVersesRead: number;
-  graceGems: number; // 은총 선물(보석) 카운트
-  readVerseIds: number[];
-  level: number;
-  emotionHistory: { emotion: Emotion; date: string; note?: string }[];
-  lastReadDate?: string;
-  dailyStreak: number;
-  reminderEnabled: boolean;
 }

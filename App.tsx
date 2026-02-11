@@ -1,16 +1,17 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { GameState, UserProgress, Emotion, Verse, EmotionDetail, CatholicPrayer } from './types';
 import { BIBLE_VERSES } from './constants';
 import { EMOTION_DB } from './emotionData';
 import { CATHOLIC_PRAYERS } from './prayerData';
 import { fetchDailyGospelAcclamation } from './services/geminiService';
+import { storage } from './utils/storage';
 import Meadow from './components/Meadow';
 import SheepCharacter from './components/SheepCharacter';
 import { SettingsPage } from './components/SettingsPage';
-import bgmPiano from './assets/sounds/bgm4.mp3';   // 피아노로 쓸 파일
-import bgmNature from './assets/sounds/bgm3.mp3'; // 자연음으로 쓸 파일
-import bgmSing from "./assets/sounds/emao.mp3"; // 엠마오로 가는 고양이 노래
+import { ProfilePage } from './components/ProfilePage';
+import bgmPiano from './assets/sounds/bgm4.mp3';
+import bgmNature from './assets/sounds/bgm3.mp3';
+import bgmSing from "./assets/sounds/emao.mp3";
 
 const App: React.FC = () => {
   const [progress, setProgress] = useState<UserProgress>(() => {
@@ -22,26 +23,29 @@ const App: React.FC = () => {
       level: 0, 
       emotionHistory: [], 
       dailyStreak: 0, 
-      reminderEnabled: false 
+      reminderEnabled: false,
+      // Profile data with defaults
+      nickname: '',
+      baptismalName: '',
+      feastDay: '',
+      startDate: ''
     };
     return saved ? { ...base, ...JSON.parse(saved) } : base;
   });
 
-  // [추가됨] 배경음악 상태 관리
   const [bgm, setBgm] = useState<'none' | 'piano' | 'nature' |'sing'>('none');
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // [추가됨] 음악 변경 감지 및 재생
   useEffect(() => {
     if (!audioRef.current) return;
 
-   if (bgm === 'none') {
+    if (bgm === 'none') {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
     } else {
-      let selectedSrc = bgmPiano; // 기본값
+      let selectedSrc = bgmPiano;
       if (bgm === 'nature') selectedSrc = bgmNature;
-      if (bgm === 'sing') selectedSrc = bgmSing; // 🎶 추가된 부분
+      if (bgm === 'sing') selectedSrc = bgmSing;
 
       audioRef.current.src = selectedSrc;
       audioRef.current.volume = 0.3; 
@@ -58,16 +62,34 @@ const App: React.FC = () => {
   const [readCount, setReadCount] = useState(0); 
   const [toast, setToast] = useState<{ message: string; visible: boolean }>({ message: "", visible: false });
   
-  // 기도 관련 상태
   const [selectedPrayer, setSelectedPrayer] = useState<CatholicPrayer>(CATHOLIC_PRAYERS[0]);
   const [isPrayerDrawerOpen, setIsPrayerDrawerOpen] = useState(false);
   
-  // 음성 인식 및 가라오케 상태
   const [isListening, setIsListening] = useState(false);
   const [recognizedText, setRecognizedText] = useState("");
   const [prayerWords, setPrayerWords] = useState<string[]>([]);
   const [highlightIndices, setHighlightIndices] = useState<Set<number>>(new Set());
   const recognitionRef = useRef<any>(null);
+  
+  const [micPermissionDenied, setMicPermissionDenied] = useState(false);
+  const [showMicPermissionAlert, setShowMicPermissionAlert] = useState(false);
+  
+  const [prayerTimer, setPrayerTimer] = useState(90); // 90초 타이머
+  const timerRef = useRef<number | null>(null);
+
+  // IndexedDB에서 데이터 로드
+  useEffect(() => {
+    const loadProgress = async () => {
+      const saved = await storage.getProgress();
+      if (saved) {
+        setProgress(saved);
+        if (saved.sheepName) {
+          setGameState('START');
+        }
+      }
+    };
+    loadProgress();
+  }, []);
 
   useEffect(() => {
     const loadDaily = async () => {
@@ -80,14 +102,17 @@ const App: React.FC = () => {
     };
     loadDaily();
   }, []);
-  // 마음봉헌 기도문 초기화
+
   useEffect(() => {
     if (gameState === 'EMOTION_DIARY') {
-      setDiaryText(""); // 텍스트 상태를 빈 문자열로 리셋
+      setDiaryText("");
+    }
+    // MEDITATION_PRAYER 진입 시 마이크 권한 상태 초기화 (사용자가 설정에서 권한 변경했을 수 있음)
+    if (gameState === 'MEDITATION_PRAYER') {
+      setMicPermissionDenied(false);
     }
   }, [gameState]);
 
-  // 기도문 변경 시 단어 배열 초기화
   useEffect(() => {
     const words = selectedPrayer.content.split(/\s+/);
     setPrayerWords(words);
@@ -95,24 +120,54 @@ const App: React.FC = () => {
     setRecognizedText("");
   }, [selectedPrayer]);
 
+  // 타이머 기도 useEffect
+  useEffect(() => {
+    if (gameState === 'MEDITATION_SILENT') {
+      setPrayerTimer(90); // 타이머 리셋
+      timerRef.current = window.setInterval(() => {
+        setPrayerTimer(prev => {
+          if (prev <= 1) {
+            if (timerRef.current) clearInterval(timerRef.current);
+            // 타이머 완료 처리
+            setTimeout(() => {
+              const updatedProgress = { 
+                ...progress, 
+                graceGems: (progress.graceGems || 0) + 10 
+              };
+              setProgress(updatedProgress);
+              storage.saveProgress(updatedProgress);
+              setGameState('EMOTION_DIARY');
+              showToast("기도의 은총 선물을 받았습니다! 💎 +10");
+            }, 100);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } else {
+      if (timerRef.current) clearInterval(timerRef.current);
+    }
+    
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [gameState]);
+
   const showToast = (msg: string) => {
     setToast({ message: msg, visible: true });
     setTimeout(() => setToast(prev => ({ ...prev, visible: false })), 2000);
   };
 
-  // 정규식 오류 수정
   const stripMarkdown = (text: string) => {
     if (!text) return "";
     return text.replace(/\*\*/g, '').replace(/\*/g, '').trim();
   };
 
-  // 날짜 포맷팅
   const formatDate = (dateString: string) => {
     const d = new Date(dateString);
     return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
   };
 
-  // 감정 선택 처리
   const handleEmotionSelect = (emotion: Emotion) => {
     const detail = EMOTION_DB[emotion];
     if (detail) {
@@ -134,7 +189,6 @@ const App: React.FC = () => {
     }
   };
 
-  // 말씀 이미지 공유 기능
   const shareVerseAsImage = async () => {
     const canvas = document.createElement('canvas');
     canvas.width = 1080;
@@ -208,7 +262,20 @@ const App: React.FC = () => {
     }
   };
 
-  const startListening = () => {
+  const startListening = async () => {
+    // 마이크 권한 체크
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach(track => track.stop()); // 권한 확인만 하고 바로 종료
+      setMicPermissionDenied(false);
+    } catch (error: any) {
+      if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+        setMicPermissionDenied(true);
+        setShowMicPermissionAlert(true);
+        return;
+      }
+    }
+
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
       showToast("이 브라우저는 음성 인식을 지원하지 않아요.");
@@ -220,6 +287,12 @@ const App: React.FC = () => {
     recognition.continuous = true;
     recognition.onstart = () => setIsListening(true);
     recognition.onend = () => setIsListening(false);
+    recognition.onerror = (event: any) => {
+      if (event.error === 'not-allowed') {
+        setMicPermissionDenied(true);
+        setShowMicPermissionAlert(true);
+      }
+    };
     recognition.onresult = (event: any) => {
       let interim = "";
       for (let i = event.resultIndex; i < event.results.length; ++i) {
@@ -260,7 +333,16 @@ const App: React.FC = () => {
     stopListening();
     const updatedProgress = { ...progress, graceGems: (progress.graceGems || 0) + 10 };
     setProgress(updatedProgress);
-    localStorage.setItem('sheep_bible_progress', JSON.stringify(updatedProgress));
+    storage.saveProgress(updatedProgress);
+    setGameState('EMOTION_DIARY');
+    showToast("기도의 은총 선물을 받았습니다! 💎 +10");
+  };
+
+  const completeSilentPrayer = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    const updatedProgress = { ...progress, graceGems: (progress.graceGems || 0) + 10 };
+    setProgress(updatedProgress);
+    storage.saveProgress(updatedProgress);
     setGameState('EMOTION_DIARY');
     showToast("기도의 은총 선물을 받았습니다! 💎 +10");
   };
@@ -268,16 +350,27 @@ const App: React.FC = () => {
   const saveDiary = () => {
     const emotionType = selectedEmotion?.type || Emotion.PEACE;
     const note = diaryText || "말씀으로 평화를 찾았습니다.";
-    const newEntry = { emotion: emotionType, date: new Date().toISOString(), note };
+    const newEntry = { emotion: emotionType, timestamp: Date.now(), note };
     const updatedProgress = { 
       ...progress, 
       emotionHistory: [newEntry, ...progress.emotionHistory],
       totalVersesRead: progress.totalVersesRead + 1 
     };
     setProgress(updatedProgress);
-    localStorage.setItem('sheep_bible_progress', JSON.stringify(updatedProgress));
+    storage.saveProgress(updatedProgress);
     showToast("감정 일기를 소중히 봉헌했습니다. ✨");
     setGameState('START');
+  };
+
+  const handleProfileUpdate = (data: { nickname: string; baptismalName: string; feastDay: string; profileImage?: string }) => {
+    const updatedProgress = { 
+      ...progress, 
+      ...data,
+      sheepName: data.nickname // nickname이 변경되면 sheepName도 함께 업데이트
+    };
+    setProgress(updatedProgress);
+    storage.saveProgress(updatedProgress);
+    showToast("프로필이 업데이트되었습니다. ✨");
   };
 
   const isPrayerComplete = prayerWords.length > 0 && (highlightIndices.size / prayerWords.length) >= 0.8;
@@ -293,17 +386,26 @@ const App: React.FC = () => {
             <SheepCharacter />
             <h1 className="text-3xl font-bold text-white mt-8 mb-4">반가워요!</h1>
             <input type="text" value={tempName} onChange={e => setTempName(e.target.value)} placeholder="양의 이름을 지어주세요" className="w-full bg-white/10 border-2 border-white/20 rounded-2xl px-6 py-4 text-white text-center mb-6 focus:outline-none" />
-            <button onClick={() => { setProgress(p => ({ ...p, sheepName: tempName })); setGameState('START'); }} className="w-full bg-white text-[#2E3192] font-bold py-4 rounded-2xl">시작하기</button>
+            <button 
+              onClick={() => { 
+                const startDate = new Date().toISOString();
+                const newProgress = { ...progress, sheepName: tempName, nickname: tempName, startDate };
+                setProgress(newProgress); 
+                storage.saveProgress(newProgress);
+                setGameState('START'); 
+              }} 
+              className="w-full bg-white text-[#2E3192] font-bold py-4 rounded-2xl"
+            >
+              시작하기
+            </button>
             <div className="absolute bottom-4 w-full text-center text-[11px] font-medium text-white/30 tracking-tight">© 2026 AIitZ Ellie company</div>
           </div>
         )}
         
-        {/* Start Screen - 상단 정렬로 이동 */}
-        
+        {/* Start Screen */}
         {gameState === 'START' && (
           <div className="flex-1 flex flex-col items-center justify-start pt-4 relative animate-in fade-in duration-500">
 
-            {/* [추가됨] 설정 버튼 (좌측 상단) */}
             <div className="absolute top-0 left-0 z-20">
               <button
                 onClick={() => setGameState('SETTINGS')} 
@@ -354,13 +456,29 @@ const App: React.FC = () => {
             </div>
           </div>
         )}
-        {/* [추가됨] 설정 페이지 렌더링 */}
+
+        {/* Settings Page */}
         {gameState === 'SETTINGS' && (
           <SettingsPage 
-          onBack={() => setGameState('START')} 
-          currentBgm={bgm}      // 현재 음악 상태 알려줌
-          onBgmChange={setBgm}  // 음악 바꾸는 리모컨 쥐여줌
-        />
+            onBack={() => setGameState('START')} 
+            currentBgm={bgm}
+            onBgmChange={setBgm}
+          />
+        )}
+
+        {/* Profile Page */}
+        {gameState === 'PROFILE' && (
+          <ProfilePage
+            onBack={() => setGameState('START')}
+            profileData={{
+              nickname: progress.nickname || progress.sheepName || '',
+              baptismalName: progress.baptismalName || '',
+              feastDay: progress.feastDay || '',
+              startDate: progress.startDate || '',
+              profileImage: progress.profileImage
+            }}
+            onProfileUpdate={handleProfileUpdate}
+          />
         )}
 
         {/* Emotion Card Grid */}
@@ -432,13 +550,9 @@ const App: React.FC = () => {
           </div>
         )}
 
-     
         {/* Meditation Guide */}
         {gameState === 'MEDITATION_GUIDE' && (
-          // [수정] 부모 태그에서 items-center justify-center 제거 (상단 버튼과 중앙 카드를 분리하기 위함)
           <div className="flex-1 flex flex-col pt-2 animate-in fade-in">
-            
-            {/* 1. [추가] 상단 홈 버튼 영역 */}
             <div className="w-full flex justify-start px-4 mb-4">
                <button 
                  onClick={() => { stopListening(); setGameState('START'); }}
@@ -449,7 +563,6 @@ const App: React.FC = () => {
                </button>
             </div>
 
-            {/* 2. 메인 컨텐츠 (카드) - 여기서 다시 중앙 정렬 */}
             <div className="flex-1 flex flex-col items-center justify-center text-center px-4">
               <div className="bg-white/5 backdrop-blur-md p-8 rounded-[40px] border border-white/10 w-full">
                 <div className="text-4xl mb-6 text-white">✝️</div>
@@ -462,26 +575,21 @@ const App: React.FC = () => {
                 </button>
               </div>
             </div>
-            
           </div>
         )}
 
-        {/* Meditation Prayer */}
+        {/* Meditation Prayer - Voice Recognition */}
         {gameState === 'MEDITATION_PRAYER' && (
           <div className="flex-1 flex flex-col pt-2 overflow-hidden animate-in zoom-in relative">
-            
-            {/* 상단 버튼 영역 (수정됨: 홈으로 버튼 추가) */}
             <div className="flex justify-between items-center mb-4 px-1">
-               {/* 1. 홈으로 가기 버튼 */}
                <button 
-                 onClick={() => { stopListening(); setGameState('START'); }} // 마이크 끄고 홈으로 이동
+                 onClick={() => { stopListening(); setGameState('START'); }}
                  className="text-white/70 flex items-center gap-1 active:scale-90 transition-all text-sm font-bold hover:text-white"
                >
                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M15 19l-7-7 7-7"/></svg>
                  홈으로
                </button>
 
-               {/* 2. 다른 기도문 선택 버튼 */}
                <button 
                  onClick={() => { stopListening(); setIsPrayerDrawerOpen(true); }}
                  className="bg-white/20 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/20 text-white text-xs font-bold active:scale-95 transition-all"
@@ -543,12 +651,24 @@ const App: React.FC = () => {
                       </button>
                     )}
                     
-                    <button 
-                      onClick={() => { stopListening(); setGameState('BIBLE_VIEW'); }}
-                      className="w-full bg-[#5100B3]/30 text-white/70 py-3 rounded-2xl font-bold text-xs active:scale-95 transition-all"
-                    >
-                      나의 기록 보기
-                    </button>
+                    {micPermissionDenied ? (
+                      <button 
+                        onClick={() => setShowMicPermissionAlert(true)}
+                        className="w-full bg-yellow-500/80 text-white py-3 rounded-2xl font-bold text-sm active:scale-95 transition-all flex items-center justify-center gap-2"
+                      >
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                        </svg>
+                        마이크가 안되요
+                      </button>
+                    ) : (
+                      <button 
+                        onClick={() => { stopListening(); setGameState('BIBLE_VIEW'); }}
+                        className="w-full bg-[#5100B3]/30 text-white/70 py-3 rounded-2xl font-bold text-xs active:scale-95 transition-all"
+                      >
+                        나의 기록 보기
+                      </button>
+                    )}
                   </div>
                </div>
             </div>
@@ -559,10 +679,114 @@ const App: React.FC = () => {
                 <div className="relative bg-[#4A4EAD] rounded-t-[40px] p-6 pt-10 h-[80%] overflow-hidden flex flex-col animate-in slide-in-from-bottom duration-300">
                   <div className="absolute top-4 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-white/20 rounded-full"></div>
                   <h4 className="text-white font-bold mb-6 px-2">다른 기도문을 선택해 보세요</h4>
-                  <div className="flex-1 overflow-y-auto custom-scrollbar space-y-3 pb-10">
+                  <div className="flex-1 overflow-y-auto custom-scrollbar space-y-3 px-2 pb-4">
                     {selectedEmotion && (
                       <button 
-                        onClick={() => { setSelectedPrayer({ title: `${selectedEmotion.type} 기도`, content: selectedEmotion.prayer }); setIsPrayerDrawerOpen(false); }}
+                        onClick={() => { 
+                          setSelectedPrayer({ title: `${selectedEmotion.type} 기도`, content: selectedEmotion.prayer }); 
+                          setIsPrayerDrawerOpen(false); 
+                        }}
+                        className={`w-full text-left p-5 rounded-2xl font-bold transition-all ${selectedPrayer.title.includes(selectedEmotion.type) ? 'bg-white text-[#2E3192]' : 'bg-white/10 text-white'}`}
+                      >
+                        {selectedEmotion.type} 기도 (현재 테마)
+                      </button>
+                    )}
+                    {CATHOLIC_PRAYERS.map((prayer, idx) => (
+                      <button 
+                        key={idx}
+                        onClick={() => { setSelectedPrayer(prayer); setIsPrayerDrawerOpen(false); }}
+                        className={`w-full text-left p-5 rounded-2xl font-bold transition-all ${selectedPrayer.title === prayer.title ? 'bg-white text-[#2E3192]' : 'bg-white/10 text-white hover:bg-white/20'}`}
+                      >
+                        {prayer.title}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Silent Meditation with Timer */}
+        {gameState === 'MEDITATION_SILENT' && (
+          <div className="flex-1 flex flex-col pt-2 overflow-hidden animate-in fade-in relative">
+            <div className="flex justify-between items-center mb-4 px-1">
+               <button 
+                 onClick={() => { 
+                   if (timerRef.current) clearInterval(timerRef.current);
+                   setGameState('START'); 
+                 }}
+                 className="text-white/70 flex items-center gap-1 active:scale-90 transition-all text-sm font-bold hover:text-white"
+               >
+                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M15 19l-7-7 7-7"/></svg>
+                 홈으로
+               </button>
+
+               <button 
+                 onClick={() => { 
+                   if (timerRef.current) clearInterval(timerRef.current);
+                   setIsPrayerDrawerOpen(true); 
+                 }}
+                 className="bg-white/20 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/20 text-white text-xs font-bold active:scale-95 transition-all"
+               >
+                 다른 기도문 선택
+               </button>
+            </div>
+
+            <div className="flex-1 flex flex-col items-center justify-center overflow-hidden px-6">
+               <h2 className="text-white text-xl font-bold mb-8 text-center">
+                 하느님께 마음으로 드려볼까요?
+               </h2>
+
+               {/* 양 캐릭터 */}
+               <div className="mb-8 transform scale-110">
+                 <SheepCharacter />
+               </div>
+
+               {/* 기도문 카드 */}
+               <div className="w-full bg-[#3B3E91]/60 backdrop-blur-md border border-white/10 rounded-[32px] p-8 mb-8">
+                  <h3 className="text-white text-xl font-black mb-4 text-center">{selectedPrayer.title}</h3>
+                  <div className="max-h-[200px] overflow-y-auto custom-scrollbar">
+                    <p className="text-white/90 text-sm leading-relaxed text-center whitespace-pre-wrap break-keep">
+                      {selectedPrayer.content}
+                    </p>
+                  </div>
+               </div>
+
+               {/* 타이머 */}
+               <div className="mb-8">
+                 <div className="bg-white/10 backdrop-blur-md rounded-full px-6 py-3 border border-white/20">
+                   <p className="text-white text-2xl font-black text-center">
+                     {Math.floor(prayerTimer / 60)}:{String(prayerTimer % 60).padStart(2, '0')}
+                   </p>
+                 </div>
+               </div>
+
+               {/* 완료 버튼 */}
+               <button 
+                 onClick={completeSilentPrayer}
+                 className="w-full bg-white text-[#2E3192] py-4 rounded-2xl font-bold text-base shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2"
+               >
+                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                   <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                 </svg>
+                 기도를 끝냈어요
+               </button>
+            </div>
+
+            {isPrayerDrawerOpen && (
+              <div className="fixed inset-0 z-[100] animate-in fade-in flex flex-col justify-end">
+                <div className="absolute inset-0 bg-black/40" onClick={() => setIsPrayerDrawerOpen(false)}></div>
+                <div className="relative bg-[#4A4EAD] rounded-t-[40px] p-6 pt-10 h-[80%] overflow-hidden flex flex-col animate-in slide-in-from-bottom duration-300">
+                  <div className="absolute top-4 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-white/20 rounded-full"></div>
+                  <h4 className="text-white font-bold mb-6 px-2">다른 기도문을 선택해 보세요</h4>
+                  <div className="flex-1 overflow-y-auto custom-scrollbar space-y-3 px-2 pb-4">
+                    {selectedEmotion && (
+                      <button 
+                        onClick={() => { 
+                          setSelectedPrayer({ title: `${selectedEmotion.type} 기도`, content: selectedEmotion.prayer }); 
+                          setIsPrayerDrawerOpen(false); 
+                        }}
                         className={`w-full text-left p-5 rounded-2xl font-bold transition-all ${selectedPrayer.title.includes(selectedEmotion.type) ? 'bg-white text-[#2E3192]' : 'bg-white/10 text-white'}`}
                       >
                         {selectedEmotion.type} 기도 (현재 테마)
@@ -612,7 +836,7 @@ const App: React.FC = () => {
                     <div className="flex-1">
                       <div className="flex justify-between items-start mb-1">
                         <span className="text-white/90 font-bold text-sm">{entry.emotion}</span>
-                        <span className="text-white/30 text-[10px]">{formatDate(entry.date)}</span>
+                        <span className="text-white/30 text-[10px]">{formatDate(new Date(entry.timestamp).toISOString())}</span>
                       </div>
                       <p className="text-white/60 text-xs leading-relaxed line-clamp-3 break-keep">{entry.note || "기록된 내용이 없습니다."}</p>
                     </div>
@@ -628,14 +852,14 @@ const App: React.FC = () => {
           </div>
         )}
 
-        {/* Global Bottom Nav - 하트 아이콘 잘림 수정 및 패딩 최적화 */}
-        {(gameState === 'START' || gameState === 'BIBLE_VIEW' || gameState === 'EMOTION_CARD') && (
-          <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-[92%] max-w-sm bg-white/95 backdrop-blur-md shadow-2xl rounded-[40px] px-8 py-2.5 flex items-center justify-between z-50 border border-white/50 overflow-visible">
+        {/* Global Bottom Nav */}
+        {(gameState === 'START' || gameState === 'BIBLE_VIEW' || gameState === 'EMOTION_CARD' || gameState === 'PROFILE') && (
+          <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-[92%] max-w-sm bg-white/95 backdrop-blur-md shadow-2xl rounded-[40px] px-6 py-2.5 flex items-center justify-between z-50 border border-white/50 overflow-visible">
             <button 
               onClick={() => setGameState('BIBLE_VIEW')} 
               className={`transition-all p-2.5 rounded-2xl flex items-center justify-center ${gameState === 'BIBLE_VIEW' ? 'bg-[#FF5B5B]/10 text-[#FF5B5B]' : 'text-zinc-300 hover:text-zinc-400'}`}
             >
-              <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+              <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
             </button>
             <button 
               onClick={() => { setGameState('START'); setSelectedEmotion(null); }} 
@@ -658,6 +882,12 @@ const App: React.FC = () => {
                   </defs>
                 </svg>
             </button>
+            <button 
+              onClick={() => setGameState('PROFILE')} 
+              className={`transition-all p-2.5 rounded-2xl flex items-center justify-center ${gameState === 'PROFILE' ? 'bg-[#5100B3]/10 text-[#5100B3]' : 'text-zinc-300 hover:text-zinc-400'}`}
+            >
+              <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            </button>
           </div>
         )}
 
@@ -667,6 +897,73 @@ const App: React.FC = () => {
             <p className="text-[#2E3192] font-black text-xs text-center">{toast.message}</p>
           </div>
         </div>
+
+        {/* Microphone Permission Alert */}
+        {showMicPermissionAlert && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[120] p-4 animate-in fade-in">
+            <div className="bg-white rounded-[32px] p-8 max-w-sm w-full shadow-2xl animate-in slide-in-from-bottom-4">
+              {/* 아이콘 */}
+              <div className="flex justify-center mb-4">
+                <div className="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center">
+                  <svg className="w-10 h-10 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                  </svg>
+                </div>
+              </div>
+
+              {/* 제목 */}
+              <h3 className="text-xl font-bold text-[#2E3192] text-center mb-3">
+                🎤 마이크 사용이 제한되어 있어요
+              </h3>
+
+              {/* 메시지 */}
+              <p className="text-gray-600 text-center text-sm leading-relaxed mb-4 break-keep">
+                기도문을 소리내어 읽으려면 마이크 권한이 필요해요.
+                <br />
+                <span className="font-bold text-purple-600">부모님께 도움을 요청해 주세요!</span>
+              </p>
+
+              {/* 부모님을 위한 안내 */}
+              <div className="bg-purple-50 rounded-2xl p-4 mb-4">
+                <p className="text-xs text-purple-900 font-bold mb-2">📱 부모님께</p>
+                <ol className="text-xs text-purple-800 space-y-1 list-decimal list-inside">
+                  <li>설정 → 스크린 타임</li>
+                  <li>콘텐츠 및 개인정보 보호 제한</li>
+                  <li>마이크 → 이 앱 허용</li>
+                </ol>
+              </div>
+
+              {/* 대체 방법 */}
+              <div className="bg-gradient-to-r from-pink-50 to-purple-50 rounded-2xl p-4 mb-6">
+                <p className="text-sm text-center text-purple-700 font-bold">
+                  💕 걱정마세요!
+                </p>
+                <p className="text-xs text-center text-purple-600 mt-1">
+                  마음으로 기도하셔도 하느님께 전해져요
+                </p>
+              </div>
+
+              {/* 버튼 */}
+              <div className="space-y-2">
+                <button
+                  onClick={() => {
+                    setShowMicPermissionAlert(false);
+                    setGameState('MEDITATION_SILENT');
+                  }}
+                  className="w-full bg-[#5100B3] text-white py-4 rounded-2xl font-bold shadow-lg active:scale-95 transition-all"
+                >
+                  마음으로 기도하기
+                </button>
+                <button
+                  onClick={() => setShowMicPermissionAlert(false)}
+                  className="w-full bg-gray-100 text-gray-600 py-4 rounded-2xl font-bold active:scale-95 transition-all"
+                >
+                  나중에 하기
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
       </div>
     </Meadow>

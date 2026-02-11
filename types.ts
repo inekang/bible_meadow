@@ -80,3 +80,10 @@ export interface CatholicPrayer {
   title: string;
   content: string;
 }
+
+export interface BibleBook {
+  name: string;
+  chapters: number;
+  testament: '구약' | '신약'
+  ;
+}

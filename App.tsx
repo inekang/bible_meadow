@@ -808,15 +808,47 @@ const App: React.FC = () => {
           </div>
         )}
 
-        {/* Emotion Diary */}
-        {gameState === 'EMOTION_DIARY' && (
-          <div className="flex-1 flex flex-col pt-2 animate-in slide-in-from-bottom">
-            <h2 className="text-2xl font-bold text-white mb-2 text-center">말씀을 읽고 난 후의 마음</h2>
-            <p className="text-white/40 text-sm mb-6 text-center">하느님께 드리고 싶은 한 마디를 적어보세요.</p>
-            <textarea autoFocus className="flex-1 bg-white/10 border border-white/10 rounded-3xl p-6 text-white focus:outline-none focus:border-white/30 resize-none mb-6 custom-scrollbar" placeholder="여기에 적어보세요..." value={diaryText} onChange={(e) => setDiaryText(e.target.value)} />
-            <button onClick={saveDiary} className="w-full bg-white text-[#2E3192] py-5 rounded-3xl font-bold text-lg mb-10 shadow-2xl active:scale-95 transition-all">봉헌하기</button>
-          </div>
-        )}
+{/* Emotion Diary 화면 시작 */}
+{gameState === 'EMOTION_DIARY' && (
+  <div className="flex-1 flex flex-col pt-2 animate-in slide-in-from-bottom">
+    
+    {/* 상단 네비게이션: 홈으로 버튼 */}
+    <div className="flex justify-between items-center mb-4 px-1">
+      <button 
+        onClick={() => { 
+          if (timerRef.current) clearInterval(timerRef.current); // 타이머 초기화
+          setDiaryText(""); // (선택) 작성하던 일기 초기화
+          setGameState('START'); // 홈(시작) 화면으로 이동
+        }}
+        className="text-white/70 flex items-center gap-1 active:scale-90 transition-all text-sm font-bold hover:text-white"
+      >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M15 19l-7-7 7-7"/>
+        </svg>
+        홈으로
+      </button>
+    </div>
+
+    {/* 본문 영역 */}
+    <h2 className="text-2xl font-bold text-white mb-2 text-center">말씀을 읽고 난 후의 마음</h2>
+    <p className="text-white/40 text-sm mb-6 text-center">하느님께 드리고 싶은 한 마디를 적어보세요.</p>
+    
+    <textarea 
+      autoFocus 
+      className="flex-1 bg-white/10 border border-white/10 rounded-3xl p-6 text-white focus:outline-none focus:border-white/30 resize-none mb-6 custom-scrollbar" 
+      placeholder="여기에 적어보세요..." 
+      value={diaryText} 
+      onChange={(e) => setDiaryText(e.target.value)} 
+    />
+    
+    <button 
+      onClick={saveDiary} 
+      className="w-full bg-white text-[#2E3192] py-5 rounded-3xl font-bold text-lg mb-10 shadow-2xl active:scale-95 transition-all"
+    >
+      봉헌하기
+    </button>
+  </div>
+)}
 
         {/* Bible View (Records) */}
         {gameState === 'BIBLE_VIEW' && (

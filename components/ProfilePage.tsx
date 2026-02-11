@@ -77,16 +77,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
     <div className="w-full h-full flex flex-col pt-8 animate-in slide-in-from-right">
       {/* 헤더 */}
       <div className="flex items-center gap-4 mb-6 px-1">
-        <button 
-          onClick={onBack} 
-          className="text-white/60 flex items-center gap-1 active:scale-90 transition-all font-bold"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M15 19l-7-7 7-7"/>
-          </svg>
-          뒤로
-        </button>
-        <h2 className="text-xl font-bold text-white">Profile</h2>
+        <h2 className="text-xl font-bold items-center text-white">Profile</h2>
       </div>
 
       <div className="flex-1 overflow-y-auto custom-scrollbar pb-10">

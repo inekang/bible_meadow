@@ -107,11 +107,20 @@ const App: React.FC = () => {
     if (gameState === 'EMOTION_DIARY') {
       setDiaryText("");
     }
-    // MEDITATION_PRAYER 진입 시 마이크 권한 상태 초기화 (사용자가 설정에서 권한 변경했을 수 있음)
-    if (gameState === 'MEDITATION_PRAYER') {
+    // MEDITATION_PRAYER 진입 시 마이크 권한 상태 초기화 및 기도문 설정
+    if (gameState === 'MEDITATION_PRAYER' || gameState === 'MEDITATION_SILENT') {
       setMicPermissionDenied(false);
+      // 감정이 선택되어 있으면 해당 감정 기도, 아니면 주님의 기도
+      if (selectedEmotion) {
+        setSelectedPrayer({ 
+          title: `${selectedEmotion.type} 기도`, 
+          content: selectedEmotion.prayer 
+        });
+      } else {
+        setSelectedPrayer(CATHOLIC_PRAYERS[0]); // 주님의 기도
+      }
     }
-  }, [gameState]);
+  }, [gameState, selectedEmotion]);
 
   useEffect(() => {
     const words = selectedPrayer.content.split(/\s+/);
@@ -348,9 +357,14 @@ const App: React.FC = () => {
   };
 
   const saveDiary = () => {
+    // 일기를 작성하지 않으면 봉헌 불가
+    if (!diaryText || diaryText.trim() === '') {
+      showToast("마음을 적어주세요 💭");
+      return;
+    }
+
     const emotionType = selectedEmotion?.type || Emotion.PEACE;
-    const note = diaryText || "말씀으로 평화를 찾았습니다.";
-    const newEntry = { emotion: emotionType, timestamp: Date.now(), note };
+    const newEntry = { emotion: emotionType, timestamp: Date.now(), note: diaryText };
     const updatedProgress = { 
       ...progress, 
       emotionHistory: [newEntry, ...progress.emotionHistory],
@@ -808,47 +822,15 @@ const App: React.FC = () => {
           </div>
         )}
 
-{/* Emotion Diary 화면 시작 */}
-{gameState === 'EMOTION_DIARY' && (
-  <div className="flex-1 flex flex-col pt-2 animate-in slide-in-from-bottom">
-    
-    {/* 상단 네비게이션: 홈으로 버튼 */}
-    <div className="flex justify-between items-center mb-4 px-1">
-      <button 
-        onClick={() => { 
-          if (timerRef.current) clearInterval(timerRef.current); // 타이머 초기화
-          setDiaryText(""); // (선택) 작성하던 일기 초기화
-          setGameState('START'); // 홈(시작) 화면으로 이동
-        }}
-        className="text-white/70 flex items-center gap-1 active:scale-90 transition-all text-sm font-bold hover:text-white"
-      >
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M15 19l-7-7 7-7"/>
-        </svg>
-        홈으로
-      </button>
-    </div>
-
-    {/* 본문 영역 */}
-    <h2 className="text-2xl font-bold text-white mb-2 text-center">말씀을 읽고 난 후의 마음</h2>
-    <p className="text-white/40 text-sm mb-6 text-center">하느님께 드리고 싶은 한 마디를 적어보세요.</p>
-    
-    <textarea 
-      autoFocus 
-      className="flex-1 bg-white/10 border border-white/10 rounded-3xl p-6 text-white focus:outline-none focus:border-white/30 resize-none mb-6 custom-scrollbar" 
-      placeholder="여기에 적어보세요..." 
-      value={diaryText} 
-      onChange={(e) => setDiaryText(e.target.value)} 
-    />
-    
-    <button 
-      onClick={saveDiary} 
-      className="w-full bg-white text-[#2E3192] py-5 rounded-3xl font-bold text-lg mb-10 shadow-2xl active:scale-95 transition-all"
-    >
-      봉헌하기
-    </button>
-  </div>
-)}
+        {/* Emotion Diary */}
+        {gameState === 'EMOTION_DIARY' && (
+          <div className="flex-1 flex flex-col pt-2 animate-in slide-in-from-bottom">
+            <h2 className="text-2xl font-bold text-white mb-2 text-center">말씀을 읽고 난 후의 마음</h2>
+            <p className="text-white/40 text-sm mb-6 text-center">하느님께 드리고 싶은 한 마디를 적어보세요.</p>
+            <textarea autoFocus className="flex-1 bg-white/10 border border-white/10 rounded-3xl p-6 text-white focus:outline-none focus:border-white/30 resize-none mb-6 custom-scrollbar" placeholder="여기에 적어보세요..." value={diaryText} onChange={(e) => setDiaryText(e.target.value)} />
+            <button onClick={saveDiary} className="w-full bg-white text-[#2E3192] py-5 rounded-3xl font-bold text-lg mb-10 shadow-2xl active:scale-95 transition-all">봉헌하기</button>
+          </div>
+        )}
 
         {/* Bible View (Records) */}
         {gameState === 'BIBLE_VIEW' && (

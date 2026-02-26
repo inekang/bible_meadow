@@ -368,7 +368,8 @@ const App: React.FC = () => {
     const updatedProgress = { 
       ...progress, 
       emotionHistory: [newEntry, ...progress.emotionHistory],
-      totalVersesRead: progress.totalVersesRead + 1 
+      totalVersesRead: progress.totalVersesRead + 1 ,
+      startDate: progress.startDate || new Date().toISOString(), // ← 추가
     };
     setProgress(updatedProgress);
     storage.saveProgress(updatedProgress);

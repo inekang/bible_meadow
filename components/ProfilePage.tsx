@@ -70,6 +70,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
   const formatDate = (dateString: string) => {
     if (!dateString) return '아직 시작하지 않았어요';
     const d = new Date(dateString);
+    if (isNaN(d.getTime())) return '아직 시작하지 않았어요'; 
     return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
   };
 

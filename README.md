@@ -14,7 +14,7 @@
 **성경 읽는 양**은 바쁜 일상 속에서도 하느님의 말씀을 가까이할 수 있도록 돕는 묵상 도우미 서비스입니다.
 귀여운 양 캐릭터와 함께 편안한 배경음악을 들으며, 매일의 복음을 소리 내어 읽고 마음의 평화를 찾을 수 있습니다.
 
-**배포 링크:** [https://biblemeadow.netlify.app](https://biblemeadow.netlify.app)
+**배포 링크:** [https://biblemeadow.netlify.app]((https://biblemeadow.netlify.app/?utm_source=github&utm_medium=readme&utm_campaign=repo_link))
 
 ---
 

@@ -75,7 +75,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
   };
 
   return (
-    <div className="w-full h-full flex flex-col pt-8 animate-in slide-in-from-right">
+    <div className="w-full h-full flex flex-col animate-in slide-in-from-right">
       {/* 헤더 */}
       <div className="flex items-center gap-4 mb-6 px-1">
         <h2 className="text-xl font-bold items-center text-white">Profile</h2>
@@ -86,7 +86,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
         <div className="flex flex-col items-center mb-8">
           <div className="relative">
             {profileImage ? (
-              <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-white/20 shadow-2xl bg-white">
+              <div className="w-30 h-30 rounded-full overflow-hidden border-4 border-white/20 shadow-2xl bg-white">
                 <img 
                   src={profileImage} 
                   alt="Profile" 
@@ -94,7 +94,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                 />
               </div>
             ) : (
-              <div className="transform scale-90">
+              <div className="transform scale-40">
                 <SheepCharacter />
               </div>
             )}

@@ -8,7 +8,7 @@ type SettingsPageProps = {
 
 export const SettingsPage: React.FC<SettingsPageProps> = ({ onBack, currentBgm, onBgmChange }) => {
   return (
-    <div className="w-full h-full flex flex-col pt-8 animate-in slide-in-from-right">
+    <div className="w-full h-full flex flex-col animate-in slide-in-from-right">
       {/* 헤더 */}
       <div className="flex items-center gap-4 mb-6 px-1">
         <button 

@@ -85,19 +85,21 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
         {/* 양 캐릭터 */}
         <div className="flex flex-col items-center mb-8">
           <div className="relative">
-            {profileImage ? (
-              <div className="w-30 h-30 rounded-full overflow-hidden border-4 border-white/20 shadow-2xl bg-white">
-                <img 
-                  src={profileImage} 
-                  alt="Profile" 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            ) : (
-              <div className="transform scale-40">
-                <SheepCharacter />
-              </div>
-            )}
+         {profileImage ? (
+  <div className="w-[148px] h-[148px] rounded-full overflow-hidden border-4 border-white/20 shadow-2xl bg-white">
+    <img 
+      src={profileImage} 
+      alt="Profile" 
+      className="w-full h-full object-cover"
+    />
+  </div>
+) : (
+  <div className="w-[148px] h-[148px] flex items-center justify-center overflow-hidden">
+    <div className="transform scale-75">
+      <SheepCharacter />
+    </div>
+  </div>
+)}
             <input
               ref={fileInputRef}
               type="file"

@@ -148,9 +148,6 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onBack, currentBgm, 
       </a>
             </div>
 
-            <div className="text-[10px] text-gray-400 border-t border-gray-100 pt-4">
-              v1.1.0 | bible_meadow
-            </div>
           </div>
         </section>
         

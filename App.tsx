@@ -1,3 +1,4 @@
+import { getOrCreateUserId } from './services/storage';
 import React, { useState, useEffect, useRef } from 'react';
 import { GameState, UserProgress, Emotion, Verse, EmotionDetail, CatholicPrayer } from './types';
 import { BIBLE_VERSES } from './constants';
@@ -13,24 +14,21 @@ import bgmPiano from './assets/sounds/bgm4.mp3';
 import bgmNature from './assets/sounds/bgm3.mp3';
 import bgmSing from "./assets/sounds/emao.mp3";
 
+
+
 const App: React.FC = () => {
-  const [progress, setProgress] = useState<UserProgress>(() => {
-    const saved = localStorage.getItem('sheep_bible_progress');
-    const base: UserProgress = { 
-      totalVersesRead: 0, 
-      graceGems: 0,
-      readVerseIds: [], 
-      level: 0, 
-      emotionHistory: [], 
-      dailyStreak: 0, 
-      reminderEnabled: false,
-      // Profile data with defaults
-      nickname: '',
-      baptismalName: '',
-      feastDay: '',
-      startDate: ''
-    };
-    return saved ? { ...base, ...JSON.parse(saved) } : base;
+  const [progress, setProgress] = useState<UserProgress>({
+    totalVersesRead: 0,
+    graceGems: 0,
+    readVerseIds: [],
+    level: 0,
+    emotionHistory: [],
+    dailyStreak: 0,
+    reminderEnabled: false,
+    nickname: '',
+    baptismalName: '',
+    feastDay: '',
+    startDate: ''
   });
 
   const [bgm, setBgm] = useState<'none' | 'piano' | 'nature' |'sing'>('none');
@@ -77,9 +75,14 @@ const App: React.FC = () => {
   const [prayerTimer, setPrayerTimer] = useState(90); // 90초 타이머
   const timerRef = useRef<number | null>(null);
 
-  // IndexedDB에서 데이터 로드
+  // IndexedDB에서 데이터 로드 + 익명 사용자 ID 생성
   useEffect(() => {
-    const loadProgress = async () => {
+    const initApp = async () => {
+      // 익명 사용자 ID 자동 생성 (개인정보 없이 로그인)
+      const userId = await getOrCreateUserId();
+      console.log('사용자 ID:', userId);
+
+      // 저장된 진행 데이터 불러오기
       const saved = await storage.getProgress();
       if (saved) {
         setProgress(saved);
@@ -88,7 +91,7 @@ const App: React.FC = () => {
         }
       }
     };
-    loadProgress();
+    initApp();
   }, []);
 
   useEffect(() => {

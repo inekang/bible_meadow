@@ -154,6 +154,43 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onBack, currentBgm, 
           </div>
         </section>
         
+        {/* 4. 법적 정보 */}
+        <section>
+          <h3 className="text-white/60 text-xs font-bold mb-2 ml-2">법적 정보</h3>
+          <div className="bg-white/95 backdrop-blur-md rounded-[20px] overflow-hidden shadow-lg">
+            <a
+              href="https://www.notion.so/31f512c3b5ba80f1a25def03f87ac2a3"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full flex items-center justify-between p-5 border-b border-gray-100 active:bg-gray-100 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-xl shadow-inner">
+                  🔒
+                </div>
+                <div>
+                  <p className="font-bold text-[#2E3192] text-sm">개인정보 처리방침</p>
+                  <p className="text-[11px] text-gray-500">수집하는 정보 및 사용 방법 안내</p>
+                </div>
+              </div>
+              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+              </svg>
+            </a>
+            <div className="flex items-center justify-between p-5">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center text-xl shadow-inner">
+                  📋
+                </div>
+                <div>
+                  <p className="font-bold text-[#2E3192] text-sm">버전 정보</p>
+                  <p className="text-[11px] text-gray-500">v1.1.0 · © 2026 AIitZ Ellie company</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* 하단 여백 */}
         <div className="h-10"></div>
       </div>

@@ -184,7 +184,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onBack, currentBgm, 
                 </div>
                 <div>
                   <p className="font-bold text-[#2E3192] text-sm">버전 정보</p>
-                  <p className="text-[11px] text-gray-500">v1.1.0 · © 2026 AIitZ Ellie company</p>
+                  <p className="text-[11px] text-gray-500">v1.2.0 · © 2026 AIitZ Ellie company</p>
                 </div>
               </div>
             </div>
